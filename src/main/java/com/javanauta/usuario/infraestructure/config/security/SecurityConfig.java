@@ -37,15 +37,25 @@ public class SecurityConfig {
         // Cria uma instância do JwtRequestFilter com JwtUtil e UserDetailsService
         JwtRequestFilter jwtRequestFilter = new JwtRequestFilter(jwtUtil, userDetailsService);
 
+
+
         http
-                .csrf(AbstractHttpConfigurer::disable) // Desativa proteção CSRF para APIs REST (não aplicável a APIs que não mantêm estado)
+                .csrf(AbstractHttpConfigurer::disable)// Desativa proteção CSRF para APIs REST (não aplicável a APIs que não mantêm estado)
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/error").permitAll()
+                        .requestMatchers("/usuario/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/usuario").permitAll()
+                        .requestMatchers("/usuario/**").authenticated()
+                        .anyRequest().authenticated()
+                )
+
+                /*.authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/usuario/login").permitAll() // Permite acesso ao endpoint de login sem autenticação
                         .requestMatchers(HttpMethod.GET, "/auth").permitAll()// Permite acesso ao endpoint GET /auth sem autenticação
                         .requestMatchers(HttpMethod.POST, "/usuario").permitAll() // Permite acesso ao endpoint POST /usuario sem autenticação
                         .requestMatchers("/usuario/**").authenticated() // Requer autenticação para qualquer endpoint que comece com /usuario/
                         .anyRequest().authenticated() // Requer autenticação para todas as outras requisições
-                )
+                )*/
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Configura a política de sessão como stateless (sem sessão)
                 )
@@ -54,6 +64,7 @@ public class SecurityConfig {
         // Retorna a configuração do filtro de segurança construída
         return http.build();
     }
+
 
     // Configura o PasswordEncoder para criptografar senhas usando BCrypt
     @Bean
@@ -67,5 +78,6 @@ public class SecurityConfig {
         // Obtém e retorna o AuthenticationManager da configuração de autenticação
         return authenticationConfiguration.getAuthenticationManager();
     }
+
 
 }
